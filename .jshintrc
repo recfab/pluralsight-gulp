@@ -1,4 +1,6 @@
 {
+    "esversion": 6,
+
     "bitwise": true,
     "camelcase": true,
     "curly": true,
@@ -15,7 +17,7 @@
     "nonbsp": true,
     "nonew": true,
     "plusplus": false,
-    "quotmark": "single",
+    "quotmark": "double",
     "undef": true,
     "unused": false,
     "strict": false,
