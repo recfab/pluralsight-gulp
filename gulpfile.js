@@ -9,6 +9,7 @@ gulp.task("vet", () => {
         "./*.js"
     ])
     .pipe(jscs())
+    .pipe(jscs.reporter("jscs-stylish"))
     .pipe(jshint())
     .pipe(jshint.reporter("jshint-stylish", { verbose: true }));
 });
