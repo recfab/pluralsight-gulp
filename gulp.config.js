@@ -3,10 +3,10 @@ var path = require("path");
 module.exports = function () {
     var client = "./src/client";
     var clientApp = path.join(client, "app");
+    var server = "./src/server";
     var temp = "./.tmp";
 
     var config = {
-        temp: temp,
 
         /**
          * File paths
@@ -23,8 +23,9 @@ module.exports = function () {
             path.join(clientApp, "**/*.js"),
             "!" + path.join(clientApp, "**/*.spec.js")
         ],
-
         less: path.join(client, "styles", "styles.less"),
+        server: server,
+        temp: temp,
 
         /**
          * Bower and NPM locations
@@ -33,7 +34,13 @@ module.exports = function () {
             json: require("./bower.json"),
             directory: "./bower_components",
             ignorePath: "../.."
-        }
+        },
+
+        /**
+         * Node settings
+         */
+        defaultPort: 7203,
+        nodeServer: path.join(server, "app.js")
     };
 
     config.getWiredepDefaultOptions = function () {

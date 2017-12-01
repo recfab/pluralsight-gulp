@@ -18,6 +18,8 @@ var $ = require("gulp-load-plugins")({ lazy: true });
 
 // NOTE: $.plumber : modifies #pipe to handler errors gracefully
 
+var port = process.env.PORT || config.defaultPort;
+
 gulp.task("vet", () => {
     log("Analyzing source with JSHint and JSCS");
 
@@ -73,6 +75,35 @@ gulp.task("inject", ["wiredep", "styles"], () => {
         .pipe($.inject(gulp.src(config.css)))
         .pipe($.inject(gulp.src(config.js)))
         .pipe(gulp.dest(config.client));
+});
+
+gulp.task("serve-dev", ["inject"], () => {
+    var isDev = true;
+
+    var nodeOptions  = {
+        script: config.nodeServer,
+        delayTime: 1,
+        env: {
+            "PORT": port,
+            "NODE_ENV": isDev ? "dev" : "build"
+        },
+        watch: config.server
+    };
+
+    return $.nodemon(nodeOptions)
+        .on("restart", ["vet"], (files) => {
+            log("*** nodemon restarted");
+            log("files changed on restart: \n" + files);
+        })
+        .on("start", () => {
+            log("*** nodemon started");
+        })
+        .on("crash", () => {
+            log("*** nodemon crashed: script crashed for some reason");
+        })
+        .on("exit", () => {
+
+        });
 });
 
 //////////////
