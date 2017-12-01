@@ -16,6 +16,8 @@ var $ = require("gulp-load-plugins")({ lazy: true });
 // var gulpprint = require("gulp-print");
 // var gulpif = require("gulp-if");
 
+// NOTE: $.plumber : modifies #pipe to handler errors gracefully
+
 gulp.task("vet", () => {
     log("Analyzing source with JSHint and JSCS");
 
@@ -35,6 +37,7 @@ gulp.task("styles", ["clean-styles"], () => {
 
     return gulp
         .src(config.less)
+        .pipe($.plumber())
         .pipe($.less())
         .pipe($.autoprefixer({ browsers: ["last 2 version", "> 5%"]}))
         .pipe(gulp.dest(config.temp));
@@ -43,6 +46,33 @@ gulp.task("styles", ["clean-styles"], () => {
 gulp.task("clean-styles", (done) => {
     var files = path.join(config.temp, "**/*.css");
     return clean(files, done);
+});
+
+gulp.task("less-watcher", () => {
+    gulp.watch(config.less, ["styles"]);
+});
+
+gulp.task("wiredep", () => {
+    log("Wire up the bower css js into the html");
+
+    var options = config.getWiredepDefaultOptions();
+    var wiredep = require("wiredep").stream;
+
+    return gulp
+        .src(config.index)
+        .pipe(wiredep(options))
+        .pipe(gulp.dest(config.client));
+});
+
+gulp.task("inject", ["wiredep", "styles"], () => {
+
+    log("Wire up the app css and js into the html");
+
+    return gulp
+        .src(config.index)
+        .pipe($.inject(gulp.src(config.css)))
+        .pipe($.inject(gulp.src(config.js)))
+        .pipe(gulp.dest(config.client));
 });
 
 //////////////
