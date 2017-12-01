@@ -12,6 +12,8 @@ var logger = require("morgan");
 var port = process.env.PORT || 7203;
 var routes;
 
+// foo
+
 var environment = process.env.NODE_ENV;
 
 app.use(favicon(__dirname + "/favicon.ico"));
@@ -34,6 +36,8 @@ app.get("/ping", function(req, res, next) {
     console.log(req.body);
     res.send("pong");
 });
+
+// blah
 
 switch (environment) {
     case "build":

@@ -2,6 +2,8 @@ var gulp = require("gulp");
 var args = require("yargs").argv;
 var del = require("del");
 var path = require("path");
+var browserSync = require("browser-sync");
+var setTimeout = require("timers").setTimeout;
 
 var config = require("./gulp.config")();
 
@@ -94,9 +96,15 @@ gulp.task("serve-dev", ["inject"], () => {
         .on("restart", ["vet"], (files) => {
             log("*** nodemon restarted");
             log("files changed on restart: \n" + files);
+
+            setTimeout(() => {
+                browserSync.notify("reloading noew ...");
+                browserSync.reload({ stream: false });
+            }, config.browserReloadDelay); // give nodemon time to do its business
         })
         .on("start", () => {
             log("*** nodemon started");
+            startBrowserSync();
         })
         .on("crash", () => {
             log("*** nodemon crashed: script crashed for some reason");
@@ -107,6 +115,46 @@ gulp.task("serve-dev", ["inject"], () => {
 });
 
 //////////////
+
+function changeEvent(event) {
+    var srcPattern = new RegExp("/.*(?=/" + config.source + ")/");
+    log("File " + event.path.replace(srcPattern, "") + " " + event.type);
+}
+
+function startBrowserSync() {
+    if (browserSync.active) {
+        return;
+    }
+
+    log("starting browser-sync on port " + port);
+
+    gulp.watch([config.less], ["styles"])
+        .on("change", changeEvent);
+
+    var options = {
+        proxy: "localhost:" + port,
+        port: 3000,
+        files: [
+            path.join(config.client, "**/*"),
+            "!" + config.less,
+            path.join(config.temp, "**/*.css")
+        ],
+        ghostMode: {
+            clicks: true,
+            location: false,
+            forms: true,
+            scroll: true
+        },
+        injectChanges: true,
+        logFileChanges: true,
+        logLevel: "debug",
+        logPrefix: "gulp-patterns",
+        notify: true,
+        reloadDelay: 1000
+    };
+
+    browserSync(options);
+}
 
 function clean(path) {
     log("Cleaning: " + $.util.colors.blue(path));
